@@ -22,11 +22,19 @@ const list = [
 
 class App extends Component {
   render() {
-    const helloWorld = 'Welcome to the Road to learn React';
     return (
       <div className="App">
         {list.map(function(item) {
-          return <div>{item.title}</div>
+          return (
+            <div>
+              <span>
+                <a href={item.url}>{item.title}</a>
+              </span>
+              <span>{item.author}</span>
+              <span>{item.num_comments}</span>
+              <span>{item.points}</span>
+            </div>
+          );
         })}
       </div>
     )
