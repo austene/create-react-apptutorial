@@ -65,8 +65,7 @@ class App extends Component {
   }
 }
 
-class Search extends Component {
-  render() {
+function Search(props) {
     const { value, onChange, children } = this.props;
     return (
       <form>
@@ -76,7 +75,6 @@ class Search extends Component {
             onChange={onChange} />
         </form>
     )
-  }
 }
 
 class Table extends Component {
@@ -108,13 +106,13 @@ class Button extends Component {
   render() {
     const {
       onClick,
-      className,
+      className = '',
       children,
     } = this.props;
     return (
       <button
         onClick={onClick}
-        className=''
+        className={className}
         type="button"
       >
         {children}
