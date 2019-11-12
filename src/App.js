@@ -1,5 +1,5 @@
 import React , { Component } from 'react';
-import axios from 'axios',
+import axios from 'axios';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
@@ -184,3 +184,9 @@ const Button = ({ onClick, className = '', children}) => {
 }
 
 export default App;
+
+export {
+  Button,
+  Search,
+  Table,
+};
