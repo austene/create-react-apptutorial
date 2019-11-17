@@ -1,5 +1,6 @@
 import React , { Component } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
@@ -19,6 +20,7 @@ class App extends Component {
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
+      isLoading: false,
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -49,11 +51,14 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-      }
-    })
-  };
+      },
+      isLoading: false
+    });
+  }
 
   fetchSearchTopStories(searchTerm, page = 0) {
+    this.setState({ isLoading: true });
+
     axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(result => this.setSearchTopStories(result.data))
       .catch(error => this.setState({ error }));
@@ -94,7 +99,7 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, results, searchKey, error } = this.state;
+    const { searchTerm, results, searchKey, error, isLoading } = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = ( results && results[searchKey] && results[searchKey].hits) || [];
 
@@ -119,31 +124,53 @@ class App extends Component {
           />
         }
         <div className="interactions">
-          <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
-            More
-          </Button>
+          <ButtonWithLoading
+            isLoading={isLoading} 
+            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+              More
+          </ButtonWithLoading>
         </div>
       </div>
-    )
+    );
   }
 }
 
-const Search = ({
-  value,
-  onChange,
-  onSubmit,
-  children 
-}) =>
-    <form onSubmit={onSubmit}>
-      <input
-        type="text"
-        value={value}
-        onChange={onChange} 
-      />
-      <button type="submit">
-        {children}
-      </button>
+class Search extends Component {
+  componentDidMount() {
+    if (this.input) {
+      this.input.focus();
+    }
+  }
+  render() {
+    const {
+    value,
+    onChange,
+    onSubmit,
+    children 
+  } = this.props;
+
+    return(
+      <form onSubmit={onSubmit}>
+        <input
+          type="text"
+          value={value}
+          onChange={onChange} 
+          ref={el => this.input = el }
+        />
+        <button type="submit">
+          {children}
+        </button>
       </form>
+    );
+  }
+}
+
+// Search.propTypes = {
+//   value: PropTypes.string,
+//   onChange: PropTypes.func,
+//   onSubmit: PropTypes.func,
+//   children: PropTypes.node,
+// };
 
 const Table = ({ list, onDismiss }) => {
   return (
@@ -170,9 +197,20 @@ const Table = ({ list, onDismiss }) => {
   );
 
 }
+// Table.propsTypes = {
+//   list: PropTypes.arrayOf(
+//     PropTypes.shape({
+//       objectID: PropTypes.string.isRequired,
+//       author: PropTypes.string,
+//       url: PropTypes.string,
+//       num_comments: PropTypes.number,
+//       points: PropTypes.number,
+//     })
+//   ).isRequired,
+//   onDismiss: PropTypes.func.isRequired,
+// };
 
-const Button = ({ onClick, className = '', children}) => {
-  return (
+const Button = ({ onClick, className = '', children}) =>
     <button
       onClick={onClick}
       className={className}
@@ -180,8 +218,22 @@ const Button = ({ onClick, className = '', children}) => {
     >
       {children}
     </button>
-  )
-}
+    
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};
+
+const Loading = () =>
+  <div>Loading...</div>
+
+const withLoading = (Component) => ( { isLoading, ...rest }) =>
+  isLoading
+    ? <Loading />
+    : <Component { ...rest } />
+
+const ButtonWithLoading = withLoading(Button);
 
 export default App;
 
